@@ -2,7 +2,8 @@
 Главный модуль: управление процессом от A до Z
 """
 import logging
-from modules import news_fetcher, content_generator, telegram_publisher
+from modules import news_fetcher,  telegram_publisher
+from modules.content_generator import ContentGenerator
 
 # Настройка логирования
 logging.basicConfig(
@@ -25,16 +26,14 @@ def main():
     logger.info(f"Выбрана новость: {selected_news['title']}")
 
     # 2. Генерируем контент
-    post_data = content_generator.generate_post_content(
-        selected_news,
-        title_length=70,
-        desc_length=120
+    generator = ContentGenerator()
+    title, description, image_prompt = generator.generate_post_content(
+        selected_news
     )
-
     # 3. Публикуем
     success = telegram_publisher.publish_to_telegram(
-        title=post_data["title"],
-        body=post_data["body"]
+        title=title,
+        body=description
         # image_url можно добавить позже, если интегрировать DALL·E
     )
 
