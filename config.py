@@ -40,3 +40,14 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 MAX_RETRIES = 3
 TIMEOUT = 120
 
+# === Stability AI Configuration ===
+STABILITY_API_KEY = os.getenv("STABILITY_API_KEY")
+STABILITY_ENGINE = os.getenv("STABILITY_ENGINE", "sd3")
+STABILITY_BASE_URL = "https://api.stability.ai/v1"
+
+# Настройки генерации изображений
+IMAGE_WIDTH = int(os.getenv("IMAGE_WIDTH", 768))
+IMAGE_HEIGHT = int(os.getenv("IMAGE_HEIGHT", 512))
+IMAGE_CFG_SCALE = float(os.getenv("IMAGE_CFG_SCALE", 7.0))
+IMAGE_STEPS = int(os.getenv("IMAGE_STEPS", 25))
+
