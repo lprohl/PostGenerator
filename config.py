@@ -8,7 +8,7 @@ NEWS_SOURCE = "newsapi"  # или "currents"
 
 # === Выбор ИИ-провайдера ===
 # Допустимые значения: "openai", "deepseek", "yandex"
-AI_PROVIDER = os.getenv("AI_PROVIDER", "yandex").lower()
+AI_PROVIDER = os.getenv("AI_PROVIDER", "deepseek").lower()
 
 # API Keys
 CURRENTS_API_KEY = os.getenv("CURRENTS_API_KEY")

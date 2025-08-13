@@ -28,10 +28,6 @@ class ContentGenerator:
         if self.ai_provider == 'openai':
             self.client = openai.OpenAI(api_key=OPENAI_API_KEY)
             self.model = OPENAI_MODEL
-        elif self.ai_provider == 'deepseek':
-            self.api_key = DEEPSEEK_API_KEY
-            self.model = DEEPSEEK_MODEL
-            self.base_url = DEEPSEEK_BASE_URL
         elif self.ai_provider == 'yandex':
             self.api_key = YANDEX_GPT_API_KEY
             self.folder_id = YANDEX_FOLDER_ID
@@ -57,63 +53,6 @@ class ContentGenerator:
 
         except Exception as e:
             logger.error(f"Ошибка при обращении к OpenAI: {e}")
-            return ""
-
-    def _generate_with_deepseek(self, system_prompt: str, user_prompt: str) -> str:
-        """Генерация контента с помощью DeepSeek через REST API"""
-        try:
-            headers = {
-                'Authorization': f'Bearer {self.api_key}',
-                'Content-Type': 'application/json'
-            }
-
-            data = {
-                "model": self.model,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": system_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": user_prompt
-                    }
-                ],
-                "temperature": 0.7,
-                "max_tokens": 1000
-            }
-
-            # Формируем полный URL для chat/completions
-            url = f"{self.base_url.rstrip('/')}/chat/completions"
-
-            logger.info(f"Отправка запроса к DeepSeek: {url}")
-            logger.debug(f"Данные запроса: {json.dumps(data, ensure_ascii=False, indent=2)}")
-
-            response = requests.post(
-                url,
-                headers=headers,
-                json=data,
-                timeout=60
-            )
-
-            logger.info(f"Статус ответа DeepSeek: {response.status_code}")
-
-            if response.status_code == 200:
-                result = response.json()
-                return result['choices'][0]['message']['content']
-            else:
-                logger.error(f"Ошибка DeepSeek API: {response.status_code}")
-                logger.error(f"Текст ошибки: {response.text}")
-                return ""
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Ошибка запроса к DeepSeek: {e}")
-            return ""
-        except KeyError as e:
-            logger.error(f"Ошибка парсинга ответа DeepSeek: {e}")
-            return ""
-        except Exception as e:
-            logger.error(f"Неожиданная ошибка при обращении к DeepSeek: {e}")
             return ""
 
     def _generate_with_yandex(self, system_prompt: str, user_prompt: str) -> str:
@@ -152,7 +91,7 @@ class ContentGenerator:
                 self.yandex_url,
                 headers=headers,
                 json=data,
-                timeout=60  # Добавляем таймаут
+                timeout=30  # Добавляем таймаут
             )
 
             logger.info(f"Статус ответа YandexGPT: {response.status_code}")
@@ -216,8 +155,6 @@ class ContentGenerator:
             # Выбираем метод генерации в зависимости от провайдера
             if self.ai_provider == 'openai':
                 content = self._generate_with_openai(system_prompt, user_prompt)
-            elif self.ai_provider == 'deepseek':
-                content = self._generate_with_deepseek(system_prompt, user_prompt)
             elif self.ai_provider == 'yandex':
                 content = self._generate_with_yandex(system_prompt, user_prompt)
             else:
@@ -273,41 +210,6 @@ class ContentGenerator:
                     logger.info("Тест подключения к OpenAI API успешен")
                     return True
 
-            elif self.ai_provider == 'deepseek':
-                headers = {
-                    'Authorization': f'Bearer {self.api_key}',
-                    'Content-Type': 'application/json'
-                }
-
-                data = {
-                    "model": self.model,
-                    "messages": [
-                        {
-                            "role": "user",
-                            "content": "Привет"
-                        }
-                    ],
-                    "temperature": 0.1,
-                    "max_tokens": 10
-                }
-
-                url = f"{self.base_url.rstrip('/')}/chat/completions"
-
-                response = requests.post(
-                    url,
-                    headers=headers,
-                    json=data,
-                    timeout=60
-                )
-
-                if response.status_code == 200:
-                    logger.info("Тест подключения к DeepSeek API успешен")
-                    return True
-                else:
-                    logger.error(f"Ошибка DeepSeek API: {response.status_code}")
-                    logger.error(f"Текст ошибки: {response.text}")
-                    return False
-
             elif self.ai_provider == 'yandex':
                 headers = {
                     'Authorization': f'Api-Key {self.api_key}',
@@ -334,7 +236,7 @@ class ContentGenerator:
                     self.yandex_url,
                     headers=headers,
                     json=data,
-                    timeout=60
+                    timeout=30
                 )
 
                 if response.status_code == 200:
@@ -362,7 +264,7 @@ if __name__ == "__main__":
 
         # Тест генерации контента
         test_news = {
-            "title": "U.N. Security Council condemns Gaza war plans, 'inadequate' aid",
+            "title": "U.N. Security Council condemns Gaza war plans, 'inadequate’ aid",
             "description": "Aug. 10 (UPI) -- The United Nations Security Council convened an emergency meeting Sunday to discuss Gaza and the Middle East, specifically Israel's plan announced Friday to seize control of Gaza City. The Sunday meeting of the U.N. Security Council was called for by Britain, Denmark, France, Greece and Slovenia. It did not place a resolution on the table, a measure that the United States has used its veto power to block five times previously, but saw condemnation of Israel's plans for Gaza City. Miroslav Jenca, the assistant secretary-general for Europe, Central Asia and Americas in the United Nations Department of Political Affairs, opened the meeting with a briefing about the conditions on the ground in Gaza, including mass starvation. Jenca said the situation in Gaza continues to deteriorate, placing 2 million Palestinians in 'even greater peril' while the plan would further endanger the lives of the remaining captives taken by Hamas.",
         }
 
